@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glow Studio - Sistema de Gestión de Citas</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script src="tailwind-config.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-stone-50 text-stone-800 min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar / Navegación -->
+    <aside class="w-full md:w-64 bg-dark-900 text-stone-200 flex flex-col flex-shrink-0 border-r border-stone-800">
+        <!-- Logo Header -->
+        <div class="p-6 border-b border-stone-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-rose-400 flex items-center justify-center text-white text-xl font-serif font-bold shadow-lg shadow-rose-900/20">
+                    G
+                </div>
+                <div>
+                    <h1 class="font-serif text-lg font-bold tracking-wide text-white">GLOW STUDIO</h1>
+                    <p class="text-xs text-rose-300 tracking-wider uppercase font-medium">Beauty & Hair Spa</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de Navegación -->
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-rose-500/10 text-rose-300 border border-rose-500/20">
+                <i class="fa-solid fa-calendar-day w-5 text-center text-rose-400"></i>
+                <span>Agenda Diaria</span>
+            </button>
+            <button onclick="switchTab('nueva-cita')" id="nav-nueva-cita" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-stone-400 hover:bg-stone-800 hover:text-stone-200">
+                <i class="fa-solid fa-calendar-plus w-5 text-center text-rose-400"></i>
+                <span>Agendar Cita</span>
+            </button>
+            <button onclick="switchTab('clientes')" id="nav-clientes" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-stone-400 hover:bg-stone-800 hover:text-stone-200">
+                <i class="fa-solid fa-users w-5 text-center text-rose-400"></i>
+                <span>Clientes</span>
+            </button>
+            <button onclick="switchTab('estilistas')" id="nav-estilistas" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-stone-400 hover:bg-stone-800 hover:text-stone-200">
+                <i class="fa-solid fa-user-ninja w-5 text-center text-rose-400"></i>
+                <span>Estilistas</span>
+            </button>
+            <button onclick="switchTab('servicios')" id="nav-servicios" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-stone-400 hover:bg-stone-800 hover:text-stone-200">
+                <i class="fa-solid fa-scissors w-5 text-center text-rose-400"></i>
+                <span>Servicios</span>
+            </button>
+        </nav>
+
+        <!-- Reception Info -->
+        <div class="p-4 border-t border-stone-800 text-xs text-stone-400 bg-dark-800/50">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full bg-stone-700 flex items-center justify-center text-stone-300 font-bold">
+                    REC
+                </div>
+                <div>
+                    <p class="font-semibold text-stone-200">Recepción Principal</p>
+                    <p class="text-stone-500">Sesión Activa</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        
+        <!-- Header superior -->
+        <header class="bg-white border-b border-stone-200 py-4 px-6 md:px-8 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-10 shadow-sm">
+            <div>
+                <h2 id="page-title" class="text-2xl font-serif font-bold text-stone-800">Agenda de Citas</h2>
+                <p id="page-subtitle" class="text-xs text-stone-500">Gestión e inspección visual de las citas programadas</p>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <!-- Botón rápido de Agendar -->
+                <button onclick="switchTab('nueva-cita')" class="bg-gradient-to-r from-rose-500 to-amber-600 hover:from-rose-600 hover:to-amber-700 text-white font-medium text-sm px-4 py-2.5 rounded-xl shadow-md shadow-rose-500/10 flex items-center space-x-2 transition-all">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Nueva Cita</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content Body -->
+        <div class="p-4 md:p-8 flex-1">
+            
+            <!-- VISTA 1: DASHBOARD / AGENDA DIARIA -->
+            <section id="view-dashboard" class="tab-content space-y-6">
+                <!-- Métricas / Resumen del Día -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-stone-400 uppercase">Citas Hoy</p>
+                            <h3 id="stat-total-citas" class="text-2xl font-bold text-stone-800 mt-1">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-regular fa-calendar-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-stone-400 uppercase">Pendientes</p>
+                            <h3 id="stat-pendientes" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-regular fa-clock"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-stone-400 uppercase">Completadas</p>
+                            <h3 id="stat-completadas" class="text-2xl font-bold text-emerald-600 mt-1">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-stone-400 uppercase">Ingresos Estimados</p>
+                            <h3 id="stat-ingresos" class="text-2xl font-bold text-stone-800 mt-1">$0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-50 text-purple-500 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros de la Agenda -->
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div class="flex items-center space-x-3 w-full md:w-auto">
+                        <label class="text-sm font-semibold text-stone-600 flex items-center space-x-2">
+                            <i class="fa-regular fa-calendar text-rose-500"></i>
+                            <span>Fecha:</span>
+                        </label>
+                        <input type="date" id="filter-date" onchange="renderDashboard()" class="border border-stone-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 bg-stone-50">
+                        <button onclick="setTodayFilter()" class="text-xs text-rose-600 hover:text-rose-700 font-semibold px-2 py-1 rounded bg-rose-50 border border-rose-200">Hoy</button>
+                    </div>
+
+                    <div class="flex items-center space-x-3 w-full md:w-auto">
+                        <label class="text-sm font-semibold text-stone-600 flex items-center space-x-2">
+                            <i class="fa-solid fa-filter text-rose-500"></i>
+                            <span>Estilista:</span>
+                        </label>
+                        <select id="filter-stylist" onchange="renderDashboard()" class="border border-stone-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 bg-stone-50 w-full md:w-48">
+                            <option value="all">Todos los estilistas</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Lista de Citas del Día -->
+                <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+                    <div class="p-4 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
+                        <h3 class="font-bold text-stone-700 flex items-center gap-2">
+                            <i class="fa-solid fa-list-ul text-rose-500"></i>
+                            <span>Bloques de Agenda</span>
+                        </h3>
+                        <span id="date-display" class="text-xs font-semibold text-stone-500 uppercase tracking-wider"></span>
+                    </div>
+
+                    <div id="appointments-container" class="divide-y divide-stone-100 min-h-[300px]">
+                        <!-- Se insertará dinámicamente -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VISTA 2: FORMULARIO NUEVA CITA -->
+            <section id="view-nueva-cita" class="tab-content hidden max-w-3xl mx-auto space-y-6">
+                <div class="bg-white p-6 md:p-8 rounded-2xl border border-stone-200 shadow-sm space-y-6">
+                    <div class="border-b border-stone-100 pb-4">
+                        <h3 class="text-xl font-serif font-bold text-stone-800">Programar Nueva Cita</h3>
+                        <p class="text-xs text-stone-500">Seleccione los detalles para agendar. El sistema validará automáticamente los horarios libres del estilista.</p>
+                    </div>
+
+                    <form id="appointment-form" onsubmit="handleSaveAppointment(event)" class="space-y-6">
+                        
+                        <!-- 1. Cliente -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-stone-600">Cliente *</label>
+                                <button type="button" onclick="quickAddClientModal()" class="text-xs text-rose-600 font-semibold hover:underline flex items-center space-x-1">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                    <span>+ Nuevo Cliente Rápido</span>
+                                </button>
+                            </div>
+                            <select id="form-cliente" required class="w-full border border-stone-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white">
+                                <option value="">-- Seleccionar Cliente --</option>
+                            </select>
+                        </div>
+
+                        <!-- 2. Servicio & Estilista Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-stone-600">Servicio *</label>
+                                <select id="form-servicio" required onchange="checkTimeConflict()" class="w-full border border-stone-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white">
+                                    <option value="">-- Seleccionar Servicio --</option>
+                                </select>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-stone-600">Estilista *</label>
+                                <select id="form-estilista" required onchange="checkTimeConflict()" class="w-full border border-stone-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white">
+                                    <option value="">-- Seleccionar Estilista --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 3. Fecha y Hora -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-stone-600">Fecha *</label>
+                                <input type="date" id="form-fecha" required onchange="checkTimeConflict()" class="w-full border border-stone-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white">
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-stone-600">Hora de Inicio *</label>
+                                <input type="time" id="form-hora" required onchange="checkTimeConflict()" class="w-full border border-stone-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white">
+                            </div>
+                        </div>
+
+                        <!-- Banner Resumen de Horario & Validación Conflictos -->
+                        <div id="conflict-alert" class="hidden rounded-xl p-4 transition-all">
+                            <!-- Inyectado dinámicamente -->
+                        </div>
+
+                        <!-- Notas Adicionales -->
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-stone-600">Notas de la Cita (Opcional)</label>
+                            <textarea id="form-notas" rows="2" placeholder="Ej. Tinte color rubio ceniza, alergia a ciertos acondicionadores..." class="w-full border border-stone-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white"></textarea>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="flex justify-end space-x-3 pt-4 border-t border-stone-100">
+                            <button type="button" onclick="switchTab('dashboard')" class="px-5 py-2.5 rounded-xl border border-stone-300 text-stone-600 font-semibold text-sm hover:bg-stone-50">Cancelar</button>
+                            <button type="submit" id="btn-save-appointment" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-amber-600 text-white font-semibold text-sm shadow-md hover:from-rose-600 hover:to-amber-700 transition-all">Confirmar Cita</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- VISTA 3: CLIENTES -->
+            <section id="view-clientes" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-stone-200">
+                    <div class="relative w-full sm:w-72">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-stone-400"></i>
+                        <input type="text" id="search-client" onkeyup="renderClients()" placeholder="Buscar cliente..." class="w-full pl-9 pr-4 py-2 border border-stone-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-400">
+                    </div>
+                    <button onclick="openClientModal()" class="w-full sm:w-auto bg-stone-900 text-white hover:bg-stone-800 text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Agregar Cliente</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="clients-grid">
+                    <!-- Se renderizan clientes dinámicamente -->
+                </div>
+            </section>
+
+            <!-- VISTA 4: ESTILISTAS -->
+            <section id="view-estilistas" class="tab-content hidden space-y-6">
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-stone-200">
+                    <h3 class="font-bold text-stone-700">Equipo de Estilistas</h3>
+                    <button onclick="openStylistModal()" class="bg-stone-900 text-white hover:bg-stone-800 text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Agregar Estilista</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="stylists-grid">
+                    <!-- Cards Estilistas -->
+                </div>
+            </section>
+
+            <!-- VISTA 5: SERVICIOS -->
+            <section id="view-servicios" class="tab-content hidden space-y-6">
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-stone-200">
+                    <h3 class="font-bold text-stone-700">Catálogo de Servicios</h3>
+                    <button onclick="openServiceModal()" class="bg-stone-900 text-white hover:bg-stone-800 text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Nuevo Servicio</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-stone-50 border-b border-stone-200 text-xs font-bold text-stone-500 uppercase tracking-wider">
+                                <th class="p-4">Servicio</th>
+                                <th class="p-4">Categoría</th>
+                                <th class="p-4">Duración</th>
+                                <th class="p-4">Precio</th>
+                                <th class="p-4 text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="services-table-body" class="divide-y divide-stone-100 text-sm">
+                            <!-- Contenido dinámico -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- MODAL CLIENTE -->
+    <div id="modal-client" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 id="modal-client-title" class="font-serif font-bold text-lg text-stone-800">Agregar Cliente</h3>
+                <button onclick="closeModal('modal-client')" class="text-stone-400 hover:text-stone-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-modal-client" onsubmit="saveClient(event)" class="space-y-4">
+                <input type="hidden" id="client-id">
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nombre Completo *</label>
+                    <input type="text" id="client-name" required class="w-full border rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Teléfono *</label>
+                    <input type="tel" id="client-phone" required placeholder="Ej: +57 300 1234567" class="w-full border rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Correo Electrónico</label>
+                    <input type="email" id="client-email" placeholder="cliente@correo.com" class="w-full border rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Notas de Preferencia</label>
+                    <textarea id="client-notes" rows="2" placeholder="Ej. Prefiere café con leche, sensibilidd a amoníaco..." class="w-full border rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 outline-none"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-client')" class="px-4 py-2 border rounded-xl text-xs font-bold text-stone-600">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ESTILISTA -->
+    <div id="modal-stylist" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-serif font-bold text-lg text-stone-800">Agregar Estilista</h3>
+                <button onclick="closeModal('modal-stylist')" class="text-stone-400 hover:text-stone-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-modal-stylist" onsubmit="saveStylist(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nombre Completo *</label>
+                    <input type="text" id="stylist-name" required class="w-full border rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Especialidades *</label>
+                    <input type="text" id="stylist-spec" required placeholder="Ej: Colorimetría, Cortes de Dama" class="w-full border rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Color Distintivo</label>
+                    <input type="color" id="stylist-color" value="#f43f5e" class="w-full h-10 border rounded-xl p-1 cursor-pointer">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-stylist')" class="px-4 py-2 border rounded-xl text-xs font-bold text-stone-600">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL SERVICIO -->
+    <div id="modal-service" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-serif font-bold text-lg text-stone-800">Nuevo Servicio</h3>
+                <button onclick="closeModal('modal-service')" class="text-stone-400 hover:text-stone-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-modal-service" onsubmit="saveService(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nombre del Servicio *</label>
+                    <input type="text" id="service-name" required class="w-full border rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Categoría</label>
+                    <select id="service-category" class="w-full border rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 outline-none">
+                        <option value="Cabello">Cabello</option>
+                        <option value="Uñas">Uñas</option>
+                        <option value="Estética / Facial">Estética / Facial</option>
+                        <option value="Barbería">Barbería</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Duración (min) *</label>
+                        <input type="number" id="service-duration" required min="15" step="15" value="45" class="w-full border rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Precio ($) *</label>
+                        <input type="number" id="service-price" required min="0" value="25" class="w-full border rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 outline-none">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-service')" class="px-4 py-2 border rounded-xl text-xs font-bold text-stone-600">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
