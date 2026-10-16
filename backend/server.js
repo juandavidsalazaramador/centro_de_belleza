@@ -1,3 +1,6 @@
+const dns = require('node:dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']);
+
 require('dotenv').config({ quiet: true });
 
 const express = require('express');
@@ -18,7 +21,10 @@ if (missing.length > 0) {
 const app = express();
 
 // --- Middlewares globales ---
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+app.use(cors({
+  origin: ['http://localhost:9000', 'http://localhost:9001'],
+  credentials: true
+}));
 app.use(express.json());
 
 // --- Ruta de prueba ---
@@ -36,6 +42,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/servicios', require('./routes/servicios.routes'));
 app.use('/api/estilistas', require('./routes/estilistas.routes'));
+app.use('/api/citas', require('./routes/citas.routes'));
 
 // --- Errores (siempre al final) ---
 app.use(notFound);

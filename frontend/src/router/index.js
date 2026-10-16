@@ -5,8 +5,11 @@ import {
   createWebHashHistory,
   createWebHistory,
 } from 'vue-router'
+import axios from 'axios'
 
 import routes from './routes.js'
+
+const API_URL = 'http://localhost:3000/api'
 
 /*
  * If not building with SSR mode, you can
@@ -32,6 +35,46 @@ export default defineRouter((/* { store, ssrContext } */) => {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(import.meta.env.QUASAR_VUE_ROUTER_BASE),
+  })
+
+  Router.beforeEach(async (to) => {
+    if (!to.path.startsWith('/admin')) return true
+
+    const token = localStorage.getItem('glow_token')
+
+    if (!token) {
+      return to.path === '/admin/login' ? true : '/admin/login'
+    }
+
+    try {
+      const respuesta = await axios.get(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const usuario = respuesta.data.user
+
+      localStorage.setItem('glow_user', JSON.stringify(usuario))
+
+      if (usuario.role !== 'admin') {
+        return to.path === '/admin/login' ? '/' : '/'
+      }
+
+      return to.path === '/admin/login' ? '/admin' : true
+    } catch (error) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('glow_token')
+        localStorage.removeItem('glow_user')
+        return to.path === '/admin/login' ? true : '/admin/login'
+      }
+
+      if (error.response?.status === 403) {
+        localStorage.removeItem('glow_token')
+        localStorage.removeItem('glow_user')
+        return '/'
+      }
+
+      if (to.path === '/admin/login') return true
+      return '/admin/login'
+    }
   })
 
   return Router

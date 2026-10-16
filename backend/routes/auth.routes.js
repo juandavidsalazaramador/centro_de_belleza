@@ -15,7 +15,7 @@ const reglasRegistro = [
   body('password')
     .isString()
     .isLength({ min: 6 })
-    .withMessage('La contraseña debe tener al menos 6 caracteres.'),
+    .withMessage('No puedes usar esta contraseña: debe tener al menos 6 caracteres.'),
 ];
 
 const reglasLogin = [
@@ -24,7 +24,11 @@ const reglasLogin = [
 ];
 
 const reglasAdminLogin = [
-  body('usuario').isString().trim().notEmpty().withMessage('El usuario es obligatorio.'),
+  body('usuario')
+    .isString()
+    .trim()
+    .matches(/^[a-zA-Z0-9_.-]{3,30}$/)
+    .withMessage('Ingresa un nombre de usuario administrativo válido.'),
   body('password').notEmpty().withMessage('La contraseña es obligatoria.'),
 ];
 

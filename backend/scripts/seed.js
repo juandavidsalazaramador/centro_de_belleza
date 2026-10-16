@@ -1,45 +1,64 @@
+const dns = require('node:dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']);
+
 require('dotenv').config({ quiet: true });
 
 const mongoose = require('mongoose');
 const User = require('../models/User');
 
 async function main() {
-  const { MONGODB_URI, ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+  const {
+    MONGODB_URI,
+    ADMIN_USERNAME,
+    ADMIN_EMAIL,
+    ADMIN_PASSWORD,
+  } = process.env;
 
-  if (!MONGODB_URI || !ADMIN_USERNAME || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
-    console.error('❌ Faltan MONGODB_URI, ADMIN_USERNAME, ADMIN_EMAIL o ADMIN_PASSWORD en el .env');
-    process.exit(1);
+  if (![MONGODB_URI, ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD].every(
+    (value) => value && value.trim()
+  )) {
+    throw new Error(
+      'Faltan variables obligatorias del administrador en el archivo .env'
+    );
   }
 
   await mongoose.connect(MONGODB_URI);
 
-  let admin = await User.findOne({
-    $or: [{ username: ADMIN_USERNAME.toLowerCase() }, { email: ADMIN_EMAIL.toLowerCase() }],
+  const username = ADMIN_USERNAME.trim().toLowerCase();
+  const email = ADMIN_EMAIL.trim().toLowerCase();
+
+  const existing = await User.findOne({
+    $or: [{ username }, { email }],
   });
 
-  if (admin) {
-    // Si ya existe, se asegura el rol y se restablece la contraseña del .env
-    admin.role = 'admin';
-    admin.password = ADMIN_PASSWORD;
-    await admin.save();
-    console.log('♻️  El administrador ya existía: rol y contraseña actualizados desde el .env');
-  } else {
-    admin = new User({
-      nombre: 'Administrador',
-      username: ADMIN_USERNAME,
-      email: ADMIN_EMAIL,
-      password: ADMIN_PASSWORD,
-      role: 'admin',
-    });
-    await admin.save();
-    console.log('✅ Administrador creado');
+  if (existing) {
+    console.log(
+      'Ya existe una cuenta con ese usuario o correo. No se modificaron datos.'
+    );
+    return;
   }
 
-  console.log(`   Usuario: ${ADMIN_USERNAME}  |  Email: ${ADMIN_EMAIL}`);
-  await mongoose.disconnect();
+  const admin = new User({
+    nombre: 'Administrador',
+    username,
+    email,
+    password: ADMIN_PASSWORD,
+    role: 'admin',
+  });
+
+  await admin.save();
+
+  console.log('Administrador creado correctamente.');
+  console.log(`Usuario: ${username}`);
 }
 
-main().catch((err) => {
-  console.error('❌ Error en el seed:', err.message);
-  process.exit(1);
-});
+main()
+  .catch((err) => {
+    console.error('Error en el seed:', err.message);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+  });

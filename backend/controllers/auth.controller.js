@@ -38,15 +38,21 @@ async function login(req, res) {
     return res.status(401).json({ message: 'Correo o contraseña incorrectos.' });
   }
 
+  if (user.role !== 'user') {
+    return res.status(403).json({
+      message: 'Esta cuenta debe usar el acceso administrativo.',
+    });
+  }
+
   res.json({ token: signToken(user), user });
 }
 
-// POST /api/auth/admin-login  → acceso administrativo (usuario o email + contraseña)
+// POST /api/auth/admin-login  → acceso administrativo (usuario + contraseña)
 async function adminLogin(req, res) {
   const { usuario, password } = req.body;
   const clave = usuario.trim().toLowerCase();
 
-  const user = await User.findOne({ $or: [{ username: clave }, { email: clave }] }).select('+password');
+  const user = await User.findOne({ username: clave }).select('+password');
   const ok = user && (await user.comparePassword(password));
 
   if (!ok) {
