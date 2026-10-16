@@ -81,8 +81,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { API_URL } from '../services/api.js'
 
-const API_URL = 'http://localhost:3000/api'
 const router = useRouter()
 
 const formulario = ref({

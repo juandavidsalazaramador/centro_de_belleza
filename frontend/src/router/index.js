@@ -8,8 +8,7 @@ import {
 import axios from 'axios'
 
 import routes from './routes.js'
-
-const API_URL = 'http://localhost:3000/api'
+import { API_URL } from '../services/api.js'
 
 /*
  * If not building with SSR mode, you can

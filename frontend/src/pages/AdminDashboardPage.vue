@@ -183,7 +183,7 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import axios from 'axios'
 
-const API_URL = 'http://localhost:3000/api'
+import { API_URL } from '../services/api.js'
 const router = useRouter()
 const $q = useQuasar()
 

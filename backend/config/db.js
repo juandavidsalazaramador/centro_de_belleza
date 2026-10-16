@@ -1,16 +1,27 @@
 const mongoose = require('mongoose');
 
+let connectionPromise;
+
 async function connectDB() {
   const uri = process.env.MONGODB_URI;
 
-  try {
-    const conn = await mongoose.connect(uri);
-    console.log(`✅ MongoDB conectado: ${conn.connection.host}/${conn.connection.name}`);
-  } catch (error) {
-    console.error('❌ No se pudo conectar a MongoDB:', error.message);
-    // Sin base de datos la API no sirve de nada: cerramos el proceso.
-    process.exit(1);
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
   }
+
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(uri)
+      .then((conn) => {
+        console.log(`✅ MongoDB conectado: ${conn.connection.host}/${conn.connection.name}`);
+        return conn;
+      })
+      .catch((error) => {
+        connectionPromise = undefined;
+        throw error;
+      });
+  }
+
+  return connectionPromise;
 }
 
 module.exports = connectDB;

@@ -65,7 +65,7 @@ centro_de_belleza-main/
 
 ### Backend
 
-El punto de entrada es `backend/server.js`. Carga las variables de entorno, configura Express, JSON y CORS, conecta MongoDB y monta las rutas bajo `/api`.
+El punto de entrada local es `backend/server.js`; la aplicación Express y sus rutas están en `backend/app.js`. En Vercel, `backend/api/[...path].js` expone la misma aplicación como función serverless.
 
 - `config/db.js`: conexión con Mongoose mediante `MONGODB_URI`.
 - `models/`: esquemas y validaciones de `User`, `Servicio`, `Estilista` y `Cita`.
@@ -89,7 +89,7 @@ Las referencias entre colecciones se guardan como `ObjectId`. Una cita conserva 
 - `src/css/`: estilos globales y variables visuales.
 - `src/components/`: componentes reutilizables.
 
-Las páginas hacen las llamadas HTTP a la API con Axios. La URL de la API está definida actualmente como `http://localhost:3000/api` en las páginas que la consumen y en el guard del router.
+Las páginas hacen las llamadas HTTP a la API con Axios. `frontend/src/services/api.js` centraliza la URL: producción usa el backend de Vercel y desarrollo local usa `http://localhost:3000/api`.
 
 La carpeta `legacy/` contiene una versión anterior independiente con HTML, estilos y JavaScript, incluyendo una configuración de Tailwind por CDN. No forma parte de la SPA Quasar que se ejecuta con `npm run dev`.
 
@@ -215,7 +215,7 @@ npm ci
 npm run dev -- --port 9001
 ```
 
-Quasar normalmente utiliza el puerto 9000; `--port 9001` permite usar el puerto solicitado si está disponible. Si el puerto está ocupado, detén el proceso que lo utiliza o elige otro puerto. `backend/server.js` permite actualmente los orígenes locales 9000 y 9001; para usar otro puerto de frontend, agrega ese origen a la configuración CORS antes de probar desde el navegador.
+Quasar normalmente utiliza el puerto 9000; `--port 9001` permite usar el puerto solicitado si está disponible. Si el puerto está ocupado, detén el proceso que lo utiliza o elige otro puerto. `backend/app.js` permite los orígenes locales 9000 y 9001; para usar otro puerto de frontend, agrega ese origen a la configuración CORS antes de probar desde el navegador.
 
 Abre la URL que Quasar indique en la terminal. Las direcciones habituales son:
 
@@ -233,7 +233,15 @@ Desde `frontend`:
 npm run build
 ```
 
-Los archivos compilados se generan en `frontend/dist/spa`. La compilación estática no ejecuta el backend ni MongoDB; para que la aplicación desplegada funcione, publica la SPA, despliega la API con sus variables de entorno y configura correctamente CORS, HTTPS y la URL de API para el entorno final. La URL de API del frontend está actualmente escrita para desarrollo local.
+Los archivos compilados se generan en `frontend/dist/spa`. La compilación estática no ejecuta el backend ni MongoDB; para que la aplicación desplegada funcione, publica la SPA, despliega la API con sus variables de entorno y configura correctamente CORS. El frontend usa el backend desplegado en producción y `localhost:3000` durante el desarrollo local.
+
+### Desplegar el frontend en Vercel
+
+El proyecto usa Quasar con Vite y el frontend está dentro de `frontend/`. La configuración [vercel.json](./vercel.json) indica a Vercel cómo instalar dependencias, compilar y publicar `frontend/dist/spa`, incluso cuando no detecta automáticamente el framework.
+
+En Vercel, configura **Root Directory** como `.` (raíz del repositorio). Si solicita un framework, selecciona **Other**: aunque Quasar usa Vite internamente, sus comandos son `quasar dev` y `quasar build`, no los comandos de un proyecto Vite estándar. No sobrescribas los comandos de instalación y compilación ni el directorio de salida definidos en `vercel.json`. Si el proyecto ya estaba configurado con `frontend` como raíz, cámbialo a `.` y vuelve a desplegar.
+
+El frontend usa `https://centro-de-belleza-fben.vercel.app/api` en producción. El backend también debe desplegarse como un proyecto Vercel separado con **Root Directory** `backend` y las variables `MONGODB_URI`, `JWT_SECRET` y `CLIENT_URL` configuradas; `CLIENT_URL` debe ser `https://centrodebelleza-frontend.vercel.app`. El backend debe responder en `/api/health` antes de que funcionen las llamadas del frontend. Los avisos de npm sobre `cache-dir` y scripts de instalación no son por sí mismos la causa del 404.
 
 ## Rutas principales de la API
 
